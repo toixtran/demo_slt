@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Language Translator</title>
+</head>
+<body>
+    <h1>Enter Text to Translate to Sign Language</h1>
+    <form id="translateForm">
+        <label for="text">Enter tex:</label>
+        <input type="text" id="text" name="text" required>
+        <button type="submit">Translate</button>
+    </form>
+    <div>
+        <h3>Example:</h3>
+        <ul>
+            <li>Good morning</li>
+            <li>This is an apple</li>
+            <li>this is school</li>
+            <li>this very good is</li>
+        </ul>
+    </div>
+    <div id="loading" style="display: none;">Loading...</div>
+
+    <h2>Result:</h2>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById("translateForm").onsubmit = async function(event) {
+            event.preventDefault();
+            const text = document.getElementById("text").value;
+        
+            document.getElementById("loading").style.display = "block";
+            
+            try {
+                const response = await fetch("/translate/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: new URLSearchParams({ text })
+                });
+        
+                const result = await response.json();
+        
+                document.getElementById("loading").style.display = "none";
+        
+                if (result.gif_path) {
+                    document.getElementById("result").innerHTML = `<h3>Here is your translated GIF:</h3><img src="${result.gif_path}" alt="Sign Language Animation">`;
+                } else if (result.error) {
+                    document.getElementById("result").innerHTML = `<h3 style="color: red;">Error: ${result.error}</h3>`;
+                }
+            } catch (error) {
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("result").innerHTML = `<h3 style="color: red;">Error: ${error.message}</h3>`;
+            }
+        };        
+    </script>
+</body>
+</html>
